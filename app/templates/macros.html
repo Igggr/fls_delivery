@@ -23,8 +23,22 @@
 </section>
 {% endmacro %}
 
+
 {% macro show_all_categories(categories) %}
   {% for category, meals in categories.items() %}
     {{ category_section(category, meals) }}
   {% endfor %}
+{% endmacro %}
+
+
+{% macro render_field(field, for_="", fs="") %}
+<div class="mt-5 form-label-group">
+    {{ field.label(for_=for_, class_="text-muted") }}
+    {{ field(id=for_, class_="form-control") }}
+    {% for error in field.errors %}
+      <div class="alert alert-danger">
+          {{ error }}
+      </div>
+    {% endfor %}
+</div>
 {% endmacro %}

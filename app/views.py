@@ -1,9 +1,13 @@
+from flask import render_template
 from app import app
-
+from app.models import Meal, FoodCategory
 
 @app.route("/")
 def index():
-    return 'index'
+    categories = {}
+    for category in FoodCategory.query:
+        categories[category.title] = category.meals[:3]
+    return render_template('main.html', categories=categories)
 
 
 @app.route("/cart/")

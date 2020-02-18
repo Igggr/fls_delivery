@@ -1,0 +1,30 @@
+{% macro product_card(product) %}
+<div class="col-12 col-md-4">
+    <div class="card mb-3">
+        <img src="static/pictures/{{ product.picture }}" width="300" height="200" class="card-img-top" alt="">
+        <div class="card-body">
+            <h4 class="h5 card-title">{{ product.title }}</h4>
+            <p class="card-text">{{ product.description }}</p>
+            <button type="button" class="btn btn-danger">В корзину</button>
+        </div>
+    </div>
+</div>
+{% endmacro %}
+
+
+{% macro category_section(category, meals) %}
+<section>
+    <h3 class="my-4">{{ category }}</h3>
+    <div class="row mt-4">
+        {% for product in meals %}
+          {{ product_card(product) }}
+        {% endfor %}
+    </div>
+</section>
+{% endmacro %}
+
+{% macro show_all_categories(categories) %}
+  {% for category, meals in categories.items() %}
+    {{ category_section(category, meals) }}
+  {% endfor %}
+{% endmacro %}

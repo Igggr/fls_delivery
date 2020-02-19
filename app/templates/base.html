@@ -11,6 +11,16 @@
   {% include 'navigation.html' %}
 {% endblock %}
 
+{% with messages = get_flashed_messages(with_categories=true) %}
+  <div class="container mt-3">
+  {% for category, message in messages %}
+  <div class="alert alert-{{ category }}">
+    {{ message }}
+  </div>
+  {% endfor %}
+  </div>
+{% endwith %}
+
 {% block body %}
 {% endblock %}
 

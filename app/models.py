@@ -1,9 +1,19 @@
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask_login import UserMixin
 from enum import Enum
 from datetime import datetime
 
 db = SQLAlchemy()
+
+
+class SaveMixin:
+    def save(self):
+        try:
+            db.session.add(self)
+            db.session.commit()
+        except:
+            db.session.rollback()
 
 
 class _OrderStatus(Enum):
@@ -15,7 +25,7 @@ class _OrderStatus(Enum):
     in_dispute = 5
 
 
-class User(db.Model):
+class User(db.Model, UserMixin, SaveMixin):
     __tablename__ = "users"
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String, nullable=False)

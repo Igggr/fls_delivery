@@ -42,3 +42,12 @@
     {% endfor %}
 </div>
 {% endmacro %}
+
+{% macro render_form(form) %}
+  {{ form.hidden_tag() }}
+  {% for field in form if field if field.widget.input_type != 'hidden' %}
+    {{ render_field(field) }}
+  {% endfor %}
+  <div class="checkbox mb-3"></div>
+  <button class="btn btn-lg btn-danger btn-block" type="submit">{{ form.button_text }}</button>
+{% endmacro %}

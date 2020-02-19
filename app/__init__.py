@@ -2,6 +2,7 @@ from flask import Flask
 from flask_migrate import Migrate
 from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
+from flask_login import login_user, logout_user, LoginManager
 import os
 from app.models import db, User, Order, Meal, FoodCategory
 
@@ -13,6 +14,16 @@ app.config['SECRET_KEY'] = os.environ['SECRET_KEY']
 app.config["SQLALCHEMY_DATABASE_URI"] = os.environ['DATABASE_URI']
 
 db.init_app(app)
+
+login_manager = LoginManager(app)
+login_manager.login_view = 'login'
+login_manager.logout_view = 'logout'
+
+@login_manager.user_loader
+def load_user(id):
+    return User.query.get(int(id))
+
+
 admin = Admin(app, db)
 
 admin.add_view(ModelView(User, db.session))

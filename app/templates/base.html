@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>{% block title %} Title{% endblock %}</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 <body>
 
@@ -11,6 +12,7 @@
   {% include 'navigation.html' %}
 {% endblock %}
 
+{% block flashback %}
 {% with messages = get_flashed_messages(with_categories=true) %}
   <div class="container mt-3">
   {% for category, message in messages %}
@@ -20,13 +22,15 @@
   {% endfor %}
   </div>
 {% endwith %}
+{% endblock %}
+
 
 {% block body %}
 {% endblock %}
 
 {% block footer %}
-  <footer class="container mt-3">
-    <nav class="mt-5 navbar navbar-light bg-light">
+  <footer class="footer mt-3">
+    <nav class="container mt-5 navbar navbar-light bg-light">
       <ul class="navbar-nav mr-auto">
         <p class="h4 nav-link">Stepik Delivery</p>
       </ul>

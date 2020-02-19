@@ -45,8 +45,8 @@ def registration():
     form = RegistrationForm()
     if form.validate_on_submit():
         user = User.query.filter_by(mail=form.mail.data).first()
-        if user:
-            form.email.errors.append("Пользователь с таким ящиком уже существует.")
+        if user:                     # TODO this mail check doesn't work. Fix it
+            form.mail.errors.append("Пользователь с таким ящиком уже существует.")
             render_template('auth.html', form=form,  registration_page=True)
         user = User()
         form.populate_obj(user)

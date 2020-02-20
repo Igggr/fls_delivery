@@ -5,7 +5,9 @@
         <div class="card-body">
             <h4 class="h5 card-title">{{ product.title }}</h4>
             <p class="card-text">{{ product.description }}</p>
-            <button type="button" class="btn btn-danger">В корзину</button>
+            <form action="{{ url_for('add_to_cart', meal_id=product.id) }}" method="post">
+              <input type="submit" class="btn btn-danger" value="В корзину">
+            </form>
         </div>
     </div>
 </div>

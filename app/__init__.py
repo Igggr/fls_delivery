@@ -33,6 +33,20 @@ admin.add_view(ModelView(Order, db.session))
 
 migrate = Migrate(app, db)
 
+
+@app.context_processor
+def utility_processor():
+    def meals_in_basket():
+        return sum(v for v in session['cart'].values())
+
+    def basket_price():
+        meals_costs = (Meal.query.get(int(id)).price * ammount for id, ammount in session['cart'].items())
+        return sum(meals_costs)
+
+    return {'meals_in_basket': meals_in_basket,
+            'basket_price': basket_price}
+
+
 @app.shell_context_processor
 def shell_context():
     return {"db": db, "User": User, "Order": Order, "Meal": Meal, "FoodCategory": FoodCategory}

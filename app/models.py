@@ -4,6 +4,7 @@ from flask_login import UserMixin
 from enum import Enum
 from datetime import datetime
 
+
 db = SQLAlchemy()
 
 
@@ -29,9 +30,10 @@ class User(db.Model, UserMixin, SaveMixin):
     __tablename__ = "users"
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String, nullable=False)
-    mail = db.Column(db.String, nullable=False)
+    mail = db.Column(db.String, nullable=False, unique=True)
     _password_hash = db.Column(db.String, nullable=False)
     address = db.Column(db.String, nullable=False)
+    phone = db.Column(db.String, nullable=False)
 
     orders = db.relationship("Order", back_populates="user")
 
@@ -46,10 +48,20 @@ class User(db.Model, UserMixin, SaveMixin):
     def check_hash(self, plaintext):
         return check_password_hash(self._password_hash, plaintext)
 
-
+"""
 order_meals_association = db.Table("order_meals",
                                    db.Column("meal_id", db.Integer, db.ForeignKey("meals.id")),
                                    db.Column("order_id", db.Integer, db.ForeignKey("orders.id")),)
+"""
+
+class OrderMealAssociation(db.Model):
+    __tablename__ = 'order_meal_associations'
+    meals_id = db.Column(db.Integer, db.ForeignKey("meals.id"), primary_key=True)
+    order_id = db.Column(db.Integer, db.ForeignKey('orders.id'), primary_key=True)
+    amount = db.Column(db.Integer, default=1, nullable=False)
+
+    orders = db.relationship('Order', back_populates='meals')
+    meals = db.relationship('Meal', back_populates="orders")
 
 
 class FoodCategory(db.Model):
@@ -71,24 +83,24 @@ class Meal(db.Model):
     category_id = db.Column(db.String, db.ForeignKey("food_categories.id"))
 
     category = db.relationship("FoodCategory", back_populates="meals")
-    orders = db.relationship("Order", back_populates="meals", secondary=order_meals_association)
+    orders = db.relationship(OrderMealAssociation, back_populates="meals")
 
 
-class Order(db.Model):
+class Order(db.Model, SaveMixin):
     __tablename__ = "orders"
     id = db.Column(db.Integer, primary_key=True)
     data = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
-    meals = db.relationship(Meal, back_populates="orders", secondary=order_meals_association)
+    meals = db.relationship(OrderMealAssociation, back_populates="orders")
     user = db.relationship(User, back_populates="orders")
 
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
 
-    status = _OrderStatus
+    #status = db.Column(db.Enum("awaiting payment", "preparing", "in delivery", "delivered", name='order_status'))
 
     @property
     def total_price(self):
-        return sum([m.price for m in self.meals])
+        return sum([m.meals.price * m.amount for m in self.meals])
 
     @total_price.setter
     def total_price(self, price):

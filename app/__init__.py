@@ -24,13 +24,6 @@ def load_user(id):
     return User.query.get(int(id))
 
 
-admin = Admin(app, db)
-
-admin.add_view(ModelView(User, db.session))
-admin.add_view(ModelView(FoodCategory, db.session))
-admin.add_view(ModelView(Meal, db.session))
-admin.add_view(ModelView(Order, db.session))
-
 migrate = Migrate(app, db)
 
 
@@ -47,12 +40,22 @@ def utility_processor():
             'basket_price': basket_price}
 
 
+@app.template_filter('order_month_rus')
+def month_name(order):
+    n = order.data.month - 1
+    months = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня',
+              'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря']
+    return months[n]
+
+
 @app.shell_context_processor
 def shell_context():
     return {"db": db, "User": User, "Order": Order, "Meal": Meal, "FoodCategory": FoodCategory}
 
 
 from app.views import *
+from app.admin import admin
+
 
 if __name__ == "__main__":
     app.run()

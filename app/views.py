@@ -1,13 +1,18 @@
 from flask import render_template, redirect, url_for, flash, session, request
 from flask_login import login_user, logout_user, current_user, login_required
 from app import app
-from app.models import FoodCategory, User, Meal
+from app.models import FoodCategory, User, Meal, Order, OrderMealAssociation
 from app.forms import AuthForm,RegistrationForm
+
+
+@app.before_request
+def set_session():
+    if 'cart' not in session:
+        session['cart'] = dict()
 
 
 @app.route("/")
 def index():
-    #session['cart'].clear()
     print(session['cart'])
     categories = {}
     for category in FoodCategory.query:
@@ -22,8 +27,6 @@ def add_to_cart(meal_id):
     print(f'ref: {request.referrer}')
     meal = Meal.query.get(int(meal_id))
     flash(f'Блюдо {meal.title} добавлено в корзину', 'success')
-    if not session["cart"]:
-        session['cart'] = dict()
     session['cart'].setdefault(meal_id, 0)
     session['cart'][meal_id] += 1  # if they want 3 portion of fried potatoes - let them
     print(session['cart'])
@@ -64,7 +67,20 @@ def clear_basket():
 @app.route("/account/")
 @login_required
 def account():
-    return render_template("account.html")
+    return render_template("account.html", orders=current_user.orders)
+
+
+@app.route('/place_order/')
+def place_order():
+    order = Order(user_id=current_user.id)
+    print(f"order: {session['cart']}")
+    for meal_id, amount in session['cart'].items():
+        print(meal_id, amount)
+        association = OrderMealAssociation(orders=order, meals_id=int(meal_id), amount=amount)
+    order.save()
+    session['cart'].clear()
+    flash('Заказ отправлен', 'success')
+    return redirect(url_for('cart'))
 
 
 @app.route("/auth/", methods=["POST", "GET"])
@@ -77,7 +93,10 @@ def login():
         user = User.query.filter_by(mail=form.mail.data).first()
         if user and user.check_hash(form.password.data):
             login_user(user)
-            return redirect(url_for("account"))
+            next_page = request.args.get('next')
+            if not next_page:
+                next_page = url_for('account')
+            return redirect(next_page)
     return render_template('auth.html', form=form)
 
 
@@ -104,4 +123,3 @@ def logout():
     logout_user()
     flash("Вы вышли", "primary")
     return redirect(url_for('login'))
-

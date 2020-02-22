@@ -1,0 +1,13 @@
+{% extends 'admin/master.html' %}
+
+{% block body %}
+
+    <h1>stats will be here</h1>
+
+   Всего заказов {{ orders | length }} <br>
+   Общая сумма заказов {{ orders | sum(attribute="total_price") }}<br>
+   Всего пользователей {{ users | length }}<br>
+
+
+{% endblock %}
+

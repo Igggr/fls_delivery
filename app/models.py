@@ -3,7 +3,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
 from enum import Enum
 from datetime import datetime
-
+from sqlalchemy_utils.types.choice import ChoiceType
 
 db = SQLAlchemy()
 
@@ -17,13 +17,16 @@ class SaveMixin:
             db.session.rollback()
 
 
-class _OrderStatus(Enum):
-    awaiting_payment = 0
-    preparing = 1
-    in_delivery = 2
-    delivered = 3
-    canceled = 4
-    in_dispute = 5
+class OrderStatus(Enum):
+    awaiting_payment = "Ожидает оплаты"
+    preparing = "Заказ формируется"
+    in_delivery = "Заказ в пути"
+    delivered = "Заказ завершен"
+
+
+class UserRole(Enum):
+    user = 1
+    admin = 100
 
 
 class User(db.Model, UserMixin, SaveMixin):
@@ -34,6 +37,7 @@ class User(db.Model, UserMixin, SaveMixin):
     _password_hash = db.Column(db.String, nullable=False)
     address = db.Column(db.String, nullable=False)
     phone = db.Column(db.String, nullable=False)
+    role = db.Column(db.Enum(UserRole))
 
     orders = db.relationship("Order", back_populates="user")
 
@@ -48,11 +52,6 @@ class User(db.Model, UserMixin, SaveMixin):
     def check_hash(self, plaintext):
         return check_password_hash(self._password_hash, plaintext)
 
-"""
-order_meals_association = db.Table("order_meals",
-                                   db.Column("meal_id", db.Integer, db.ForeignKey("meals.id")),
-                                   db.Column("order_id", db.Integer, db.ForeignKey("orders.id")),)
-"""
 
 class OrderMealAssociation(db.Model):
     __tablename__ = 'order_meal_associations'
@@ -96,7 +95,7 @@ class Order(db.Model, SaveMixin):
 
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
 
-    #status = db.Column(db.Enum("awaiting payment", "preparing", "in delivery", "delivered", name='order_status'))
+    #status = db.Column(db.Enum(OrderStatus), default=OrderStatus.awaiting_payment)
 
     @property
     def total_price(self):

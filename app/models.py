@@ -41,6 +41,8 @@ class User(db.Model, UserMixin, SaveMixin):
     orders = db.relationship("Order", back_populates="user")
     _role = db.Column(db.Integer, nullable=False, default=UserRole.USER.value)
 
+    UserRole = UserRole
+
     @property
     def password(self):
         raise AttributeError("Мы заботимся о сохранности паролей)))")
@@ -54,12 +56,11 @@ class User(db.Model, UserMixin, SaveMixin):
 
     @property
     def role(self):
-        return UserRole(self.status)
+        return UserRole(self._role)
 
     @role.setter
     def role(self, role_enum):
         self.role = role_enum.value
-
 
 
 class OrderMealAssociation(db.Model):

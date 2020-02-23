@@ -2,7 +2,7 @@ from flask import render_template, redirect, url_for, flash, session, request
 from flask_login import login_user, logout_user, current_user, login_required
 from app import app
 from app.models import FoodCategory, User, Meal, Order, OrderMealAssociation
-from app.forms import AuthForm,RegistrationForm
+from app.forms import AuthForm, RegistrationForm, CSRForm
 
 
 @app.before_request
@@ -29,7 +29,6 @@ def add_to_cart(meal_id):
     flash(f'Блюдо {meal.title} добавлено в корзину', 'success')
     session['cart'].setdefault(meal_id, 0)
     session['cart'][meal_id] += 1  # if they want 3 portion of fried potatoes - let them
-    print(session['cart'])
     return redirect(request.referrer)
 
 
@@ -37,50 +36,33 @@ def add_to_cart(meal_id):
 def remove_from_cart(meal_id):
     """user will only see this link if he has that meal in basket
     so - why check that he actually has?"""
-    print("was:")
-    print(session['cart'])
-    print(f"removing from cart meal {meal_id}")
     if session['cart'][meal_id] == 1:
         session['cart'].pop(meal_id)
     else:
         session['cart'][meal_id] -= 1
-    print("became:")
-    print(session['cart'])
     session.modified = True
     flash(f"Блюдо {Meal.query.get(int(meal_id)).title} удалено из корзины", 'warning')
     return redirect(url_for('cart'))
 
 
-@app.route("/cart/")
+@app.route("/cart/", methods=["POST", "GET"])
 def cart():
-    print("inside cart page")
-    print(session['cart'])
-    return render_template('cart.html', Meal=Meal)
+    form = CSRForm()
+    if form.validate_on_submit():
+        order = Order(user_id=current_user.id)
+        for meal_id, amount in session['cart'].items():
+            association = OrderMealAssociation(orders=order, meals_id=int(meal_id), amount=amount)
+            order.save()
+        session['cart'].clear()
+        flash('Заказ отправлен', 'success')
 
-
-@app.route('/clear/')
-def clear_basket():
-    session['cart'].clear()
-    return redirect('/')
+    return render_template('cart.html', Meal=Meal, form=form)
 
 
 @app.route("/account/")
 @login_required
 def account():
     return render_template("account.html", orders=current_user.orders)
-
-
-@app.route('/place_order/')
-def place_order():
-    order = Order(user_id=current_user.id)
-    print(f"order: {session['cart']}")
-    for meal_id, amount in session['cart'].items():
-        print(meal_id, amount)
-        association = OrderMealAssociation(orders=order, meals_id=int(meal_id), amount=amount)
-    order.save()
-    session['cart'].clear()
-    flash('Заказ отправлен', 'success')
-    return redirect(url_for('cart'))
 
 
 @app.route("/auth/", methods=["POST", "GET"])

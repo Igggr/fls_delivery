@@ -37,8 +37,17 @@ def utility_processor():
         meals_costs = (Meal.query.get(int(id)).price * amount for id, amount in session['cart'].items())
         return sum(meals_costs)
 
-    return {'meals_in_basket': meals_in_basket,
-            'basket_price': basket_price}
+    order_status_colors = {Order.OrderStatus.AWAITING_PAYMENT: "danger",
+                           Order.OrderStatus.PREPARING: "secondary",
+                           Order.OrderStatus.IN_DELIVERY: "primary",
+                           Order.OrderStatus.DELIVERED: 'success'}
+
+    order_status_description = {Order.OrderStatus.AWAITING_PAYMENT: "Ожидает оплаты",
+                           Order.OrderStatus.PREPARING: "Заказ формируется",
+                           Order.OrderStatus.IN_DELIVERY: "Посылка в пути",
+                           Order.OrderStatus.DELIVERED: 'Доставлено'}
+
+    return locals()
 
 
 @app.template_filter('order_month_rus')

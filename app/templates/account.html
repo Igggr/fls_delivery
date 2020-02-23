@@ -1,5 +1,7 @@
 {% extends 'base.html' %}
 
+{% from 'macros.html' import status_badge with context %}
+
 {% block body %}
   <main class="container">
     <section class="row">
@@ -15,7 +17,7 @@
                   <span class="h5 font-weight-bold">{{ order.data.day }} {{ order | order_month_rus }}</span>
                   <span class="h5">- {{ order.total_price }} P</span>
                 </div>
-                <div class="col-3 col-lg-2 ml-5 py-2 badge badge-primary text-wrap">Выполняется</div>
+                {{ status_badge(order) }}
               </div>
             </li>
             <div class="card-body">

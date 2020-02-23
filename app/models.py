@@ -17,13 +17,16 @@ class SaveMixin:
             db.session.rollback()
 
 
-class _OrderStatus(Enum):
-    awaiting_payment = 0
-    preparing = 1
-    in_delivery = 2
-    delivered = 3
-    canceled = 4
-    in_dispute = 5
+class OrderStatus(Enum):
+    AWAITING_PAYMENT = 0
+    PREPARING = 10
+    IN_DELIVERY = 20
+    DELIVERED = 30
+
+
+class UserRole(Enum):
+    USER = 1
+    ADMIN = 100
 
 
 class User(db.Model, UserMixin, SaveMixin):
@@ -36,6 +39,7 @@ class User(db.Model, UserMixin, SaveMixin):
     phone = db.Column(db.String, nullable=False)
 
     orders = db.relationship("Order", back_populates="user")
+    _role = db.Column(db.Integer, nullable=False, default=UserRole.USER.value)
 
     @property
     def password(self):
@@ -48,11 +52,15 @@ class User(db.Model, UserMixin, SaveMixin):
     def check_hash(self, plaintext):
         return check_password_hash(self._password_hash, plaintext)
 
-"""
-order_meals_association = db.Table("order_meals",
-                                   db.Column("meal_id", db.Integer, db.ForeignKey("meals.id")),
-                                   db.Column("order_id", db.Integer, db.ForeignKey("orders.id")),)
-"""
+    @property
+    def role(self):
+        return UserRole(self.status)
+
+    @role.setter
+    def role(self, role_enum):
+        self.role = role_enum.value
+
+
 
 class OrderMealAssociation(db.Model):
     __tablename__ = 'order_meal_associations'
@@ -96,7 +104,9 @@ class Order(db.Model, SaveMixin):
 
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
 
-    #status = db.Column(db.Enum("awaiting payment", "preparing", "in delivery", "delivered", name='order_status'))
+    _status = db.Column(db.Integer, default=OrderStatus.AWAITING_PAYMENT.value, nullable=False)
+
+    OrderStatus = OrderStatus
 
     @property
     def total_price(self):
@@ -106,3 +116,10 @@ class Order(db.Model, SaveMixin):
     def total_price(self, price):
         raise ValueError("don't cheat on us")
 
+    @property
+    def status(self):
+        return OrderStatus(self._status)
+
+    @status.setter
+    def status(self, enum_status):
+        self._status = enum_status.value

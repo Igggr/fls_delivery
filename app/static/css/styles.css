@@ -17,3 +17,28 @@ body {
   padding-top: 0;
   padding-bottom: 0;
 }
+/* */
+.card {
+  display: grid;
+  grid-template-rows: 47% 53%;
+}
+
+.card-img-top {
+  grid-row: 1/2;
+}
+
+.card-body {
+   display: grid;
+   grid-template-rows: 20% 65% 15%;
+}
+
+.card-title {
+  grid-row: 1/2
+}
+.card-text {
+   grid-row: 2/3;
+}
+
+.card form {
+  grid-row: 3/4;
+}

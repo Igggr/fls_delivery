@@ -55,8 +55,14 @@ def cart():
             order.save()
         session['cart'].clear()
         flash('Заказ отправлен', 'success')
+        return redirect(url_for('order_done'))
 
     return render_template('cart.html', Meal=Meal, form=form)
+
+
+@app.route('/order_done/')
+def order_done():
+    return render_template('ordered.html')
 
 
 @app.route("/account/")

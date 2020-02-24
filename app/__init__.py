@@ -32,7 +32,6 @@ def utility_processor():
         return sum(v for v in session['cart'].values())
 
     def basket_price():
-        print(session['cart'])
         meals_costs = (Meal.query.get(int(id)).price * amount for id, amount in session['cart'].items())
         return sum(meals_costs)
 

@@ -1,4 +1,5 @@
 from flask import render_template, redirect, url_for, flash, session, request
+from flask.views import MethodView
 from flask_login import login_user, logout_user, current_user, login_required
 from app import app
 from app.models import FoodCategory, User, Meal, Order, OrderMealAssociation
@@ -45,19 +46,30 @@ def remove_from_cart(meal_id):
     return redirect(url_for('cart'))
 
 
-@app.route("/cart/", methods=["POST", "GET"])
-def cart():
-    form = CSRForm()
-    if form.validate_on_submit():
-        order = Order(user_id=current_user.id)
-        for meal_id, amount in session['cart'].items():
-            association = OrderMealAssociation(orders=order, meals_id=int(meal_id), amount=amount)
-            order.save()
-        session['cart'].clear()
-        flash('Заказ отправлен', 'success')
-        return redirect(url_for('order_done'))
+class CartView(MethodView):
+    methods = ['POST', 'GET']
 
-    return render_template('cart.html', Meal=Meal, form=form)
+    @staticmethod
+    def get():
+        form = CSRForm()
+        return render_template('cart.html', Meal=Meal, form=form)
+
+    @staticmethod
+    def post():
+        form = CSRForm()
+        if form.validate_on_submit():
+            order = Order(user_id=current_user.id)
+            for meal_id, amount in session['cart'].items():
+                association = OrderMealAssociation(orders=order, meals_id=int(meal_id), amount=amount)
+            order.save()
+            session['cart'].clear()
+            flash('Заказ отправлен', 'success')
+            return redirect(url_for('order_done'))
+        else:
+            return render_template('cart.html', Meal=Meal, form=form)
+
+
+app.add_url_rule('/cart/', view_func=CartView.as_view("cart"))
 
 
 @app.route('/order_done/')

@@ -1,6 +1,7 @@
 from flask import render_template, redirect, url_for, flash, session, request
 from flask.views import MethodView
 from flask_login import login_user, logout_user, current_user, login_required
+from  sqlalchemy.sql.expression import func
 from app import app
 from app.models import FoodCategory, User, Meal, Order, OrderMealAssociation
 from app.forms import AuthForm, RegistrationForm, CSRForm
@@ -17,7 +18,8 @@ def index():
     print(session['cart'])
     categories = {}
     for category in FoodCategory.query:
-        categories[category.title] = category.meals[:3]
+        meals3 = Meal.query.filter(Meal.category == category).order_by(func.random()).limit(3)
+        categories[category.title] = meals3
     return render_template('main.html', categories=categories)
 
 

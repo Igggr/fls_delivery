@@ -3,8 +3,8 @@
     <div class="card mb-3">
         <img src="static/pictures/{{ product.picture }}" width="300" height="200" class="card-img-top" alt="">
         <div class="card-body">
-            <h4 class="h5 card-title">{{ product.title }}</h4>
-            <p class="card-text">{{ product.description }}</p>
+            <h4 class="h5 card-title">{{ product.title | truncate(30) }}</h4>
+            <p class="card-text">{{ product.description | truncate(60) }}</p>
             <form action="{{ url_for('add_to_cart', meal_id=product.id) }}" method="post">
               <input type="submit" class="btn btn-danger" value="В корзину">
             </form>

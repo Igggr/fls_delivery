@@ -29,7 +29,7 @@ body {
 
 .card-body {
    display: grid;
-   grid-template-rows: 20% 65% 15%;
+   grid-template-rows: 35% 50% 15%;
 }
 
 .card-title {

@@ -60,7 +60,7 @@ class User(db.Model, UserMixin, SaveMixin):
 
     @role.setter
     def role(self, role_enum):
-        self.role = role_enum.value
+        self._role = role_enum.value
 
 
 class OrderMealAssociation(db.Model):

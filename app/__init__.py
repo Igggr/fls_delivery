@@ -7,7 +7,7 @@ from app.models import db, User, Order, Meal, FoodCategory
 
 app = Flask(__name__)
 
-app.config.from_object("app.config.DebugConfig")
+app.config.from_object("app.config.ProductConfig")
 app.config['SECRET_KEY'] = os.environ['SECRET_KEY']
 app.config["SQLALCHEMY_DATABASE_URI"] = os.environ['DATABASE_URL']
 

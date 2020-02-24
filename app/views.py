@@ -15,7 +15,6 @@ def set_session():
 
 @app.route("/")
 def index():
-    print(session['cart'])
     categories = {}
     for category in FoodCategory.query:
         meals3 = Meal.query.filter(Meal.category == category).order_by(func.random()).limit(3)
